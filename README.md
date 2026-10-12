@@ -23,6 +23,7 @@ El panel FENIX usa el modo automático (`--auto --domain … --cert-url … --ce
 ```
 GET /details/{username}                # formato compatible con paneles tipo DTunnel
 GET /checkuser/{username}              # alias del anterior
+GET /check/{username}?deviceId=…      # diálogo nativo de la app DTunnel (url_check_user)
 GET /api/public/checkuser/{username}   # sin API key (10 consultas/min por IP)
 GET /api/checkuser/{username}          # requiere header X-API-Key
 GET /count                             # total global de conexiones activas
