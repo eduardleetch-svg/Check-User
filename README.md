@@ -2,10 +2,9 @@
 
 por [@EduardLeetch](https://github.com/eduardleetch-svg)
 
-API de **solo lectura** que consulta el estado real de una cuenta SSH
-administrada con el menú **adm-lite**: si existe, cuántos días le quedan, y
-cuántas conexiones tiene abiertas ahora mismo frente a su límite. No crea,
-edita ni borra nada — eso sigue siendo trabajo del menú de siempre.
+API de **solo lectura** que consulta el estado real de una cuenta SSH: si
+existe, cuántos días le quedan y cuántas conexiones tiene abiertas ahora mismo
+frente a su límite. No crea, edita ni borra nada.
 
 Binario estático para `amd64`/`arm64`, sin dependencias en el servidor.
 
@@ -17,28 +16,33 @@ Una sola línea, en tu VPS (Ubuntu/Debian):
 curl -L https://github.com/eduardleetch-svg/Check-User/archive/refs/heads/main.tar.gz | tar xz && cd Check-User-main && sudo ./install.sh
 ```
 
-El instalador te guía: puerto donde escuchar, si tienes dominio propio, y
-detecta solo si los puertos 80/443 ya están ocupados por otro servicio para
-elegir el camino correcto de HTTPS.
-
-## Página web
-
-El panel sirve una mini página en `/`: un campo para escribir el usuario y
-un botón que muestra el estado.
+El panel FENIX usa el modo automático (`--auto --domain … --cert-url … --cert-token …`).
 
 ## API
 
 ```
-GET /api/checkuser/{username}          # requiere header X-API-Key
-GET /api/public/checkuser/{username}   # sin API key, mismo límite que la página web
 GET /details/{username}                # formato compatible con paneles tipo DTunnel
 GET /checkuser/{username}              # alias del anterior
+GET /api/public/checkuser/{username}   # sin API key (10 consultas/min por IP)
+GET /api/checkuser/{username}          # requiere header X-API-Key
 GET /count                             # total global de conexiones activas
+GET /healthz
 ```
 
-## Administración
+Todas las respuestas llevan CORS (`Access-Control-Allow-Origin: *`), así que un
+tema HTML puede consultarlas con `fetch` desde el WebView.
 
-El instalador trae su propio menú (`sudo ./install.sh`) para instalar,
-reinstalar, desinstalar, cambiar puerto, regenerar/ver la API key y
-reconfigurar HTTPS — no hace falta recordar ningún comando ni editar
-ningún archivo a mano.
+## Qué lee (v3.2)
+
+- **Usuario / límite / vencimiento:** primero `/etc/adm-lite/userDIR/<usuario>`
+  (`limite:` y `data:`; fechas `AAAA-MM-DD` o `DD/MM/AAAA`). Si no existe ese
+  archivo, usa el respaldo para otros menús: la cuenta del sistema (solo
+  UID ≥ 1000 con shell sin login) y su vencimiento de `/etc/shadow`.
+- **Conexiones abiertas:** procesos `sshd`, `sshd-session` (OpenSSH 9.8+) y
+  `dropbear` que pertenecen al usuario.
+
+## Compilar
+
+```bash
+./build.sh
+```
